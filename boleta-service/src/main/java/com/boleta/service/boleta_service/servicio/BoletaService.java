@@ -1,5 +1,8 @@
 package com.boleta.service.boleta_service.servicio;
 
+import com.boleta.service.boleta_service.dto.UsuarioDTO;
+import org.springframework.web.client.RestTemplate;
+
 import com.boleta.service.boleta_service.entidades.Boleta;
 import com.boleta.service.boleta_service.entidades.ItemBoleta;
 import com.boleta.service.boleta_service.repositorio.BoletaRepositorio;
@@ -13,6 +16,9 @@ import java.util.List;
 
 @Service
 public class BoletaService {
+
+    @Autowired
+    private RestTemplate restTemplate;
 
     @Autowired
     private BoletaRepositorio boletaRepositorio;
@@ -57,4 +63,10 @@ public class BoletaService {
     public void deleteById(Long id) {
         boletaRepositorio.deleteById(id);
     }
+
+    public UsuarioDTO obtenerUsuarioPorId(Long idUsuario) {
+    String url = "http://localhost:8001/api/usuario/" + idUsuario;
+    return restTemplate.getForObject(url, UsuarioDTO.class);
+}
+
 }

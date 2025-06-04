@@ -1,5 +1,6 @@
 package com.boleta.service.boleta_service.controlador;
 
+import com.boleta.service.boleta_service.dto.UsuarioDTO;
 import com.boleta.service.boleta_service.entidades.Boleta;
 import com.boleta.service.boleta_service.servicio.BoletaService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,13 +10,13 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/boleta")
+@RequestMapping("/api/boletas")
 public class BoletaController {
 
     @Autowired
     private BoletaService boletaService;
 
-    //listar todas las boletas (GET)
+    // GET /api/boletas → listar todas las boletas
     @GetMapping
     public ResponseEntity<List<Boleta>> listarBoletas() {
         List<Boleta> boletas = boletaService.getAll();
@@ -25,7 +26,7 @@ public class BoletaController {
         return ResponseEntity.ok(boletas);
     }
 
-    // GET /boleta/{id} → obtener boleta por ID
+    // GET /api/boletas/{id} → obtener boleta por ID
     @GetMapping("/{id}")
     public ResponseEntity<Boleta> obtenerBoleta(@PathVariable("id") Long id) {
         Boleta boleta = boletaService.getById(id);
@@ -35,7 +36,7 @@ public class BoletaController {
         return ResponseEntity.ok(boleta);
     }
 
-    // GET /boleta/usuario/{usuarioId} → listar boletas por usuario
+    // GET /api/boletas/usuario/{usuarioId} → listar boletas por ID de usuario
     @GetMapping("/usuario/{usuarioId}")
     public ResponseEntity<List<Boleta>> listarPorUsuario(@PathVariable("usuarioId") Long usuarioId) {
         List<Boleta> boletas = boletaService.getByUsuarioId(usuarioId);
@@ -45,14 +46,20 @@ public class BoletaController {
         return ResponseEntity.ok(boletas);
     }
 
-    // POST /boleta → crear nueva boleta
+    // GET /api/boletas/externo/usuario/{id} → obtener datos del usuario desde usuario-service
+    @GetMapping("/externo/usuario/{id}")
+    public UsuarioDTO obtenerUsuario(@PathVariable Long id) {
+        return boletaService.obtenerUsuarioPorId(id);
+    }
+
+    // POST /api/boletas → crear una nueva boleta
     @PostMapping
     public ResponseEntity<Boleta> crearBoleta(@RequestBody Boleta boleta) {
         Boleta nuevaBoleta = boletaService.save(boleta);
         return ResponseEntity.ok(nuevaBoleta);
     }
 
-    // DELETE /boleta/{id} → eliminar boleta por ID (opcional para pruebas o administración)
+    // DELETE /api/boletas/{id} → eliminar boleta por ID
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> eliminarBoleta(@PathVariable("id") Long id) {
         Boleta existente = boletaService.getById(id);

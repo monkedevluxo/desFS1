@@ -17,7 +17,7 @@ import com.usuario.service.usuario_service.modelos.Producto;
 import com.usuario.service.usuario_service.servicio.UsuarioServicio;
 
 @RestController
-@RequestMapping("/usuario")
+@RequestMapping("/api/usuario")
 
 public class UsuarioController {
 
