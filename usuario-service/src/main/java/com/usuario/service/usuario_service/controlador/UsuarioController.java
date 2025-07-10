@@ -1,16 +1,16 @@
 package com.usuario.service.usuario_service.controlador;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.CollectionModel;
+
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
+
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.usuario.service.usuario_service.entidades.Usuario;
 import com.usuario.service.usuario_service.modelos.Producto;
@@ -18,57 +18,69 @@ import com.usuario.service.usuario_service.servicio.UsuarioServicio;
 
 @RestController
 @RequestMapping("/api/usuario")
-
 public class UsuarioController {
-
-    @GetMapping("/productos/{usuarioId}")
-    public ResponseEntity<List<Producto>>listarProductos(@PathVariable("usuarioId")int id){
-        Usuario usuario = usuarioService.getUsuarioById(id);
-        if(usuario==null){
-            return ResponseEntity.notFound().build();
-        }
-        List<Producto> productos = usuarioService.getProductos(id);
-        return ResponseEntity.ok(productos);
-    }
 
     @Autowired
     private UsuarioServicio usuarioService;
 
-    @GetMapping //Permite retornar a todos los usuarios
-    public ResponseEntity<List<Usuario>> listarUsuario(){
+    @GetMapping
+    public ResponseEntity<CollectionModel<EntityModel<Usuario>>> listarUsuario() {
         List<Usuario> usuarios = usuarioService.getAll();
-        if(usuarios.isEmpty()){
+        if (usuarios.isEmpty()) {
             return ResponseEntity.noContent().build();
         }
-        return ResponseEntity.ok(usuarios);
+
+        List<EntityModel<Usuario>> usuariosConLinks = usuarios.stream()
+            .map(usuario -> EntityModel.of(usuario,
+                    linkTo(methodOn(UsuarioController.class).obtenerUsuario(usuario.getId())).withSelfRel(),
+                    linkTo(methodOn(UsuarioController.class).listarUsuario()).withRel("all-usuarios")))
+            .collect(Collectors.toList());
+
+        return ResponseEntity.ok(CollectionModel.of(usuariosConLinks));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Usuario> obtenerUsuario(@PathVariable("id") int id){
+    public ResponseEntity<EntityModel<Usuario>> obtenerUsuario(@PathVariable("id") int id) {
         Usuario usuario = usuarioService.getUsuarioById(id);
-        if(usuario == null){
+        if (usuario == null) {
             return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.ok(usuario);
+
+        EntityModel<Usuario> resource = EntityModel.of(usuario,
+                linkTo(methodOn(UsuarioController.class).obtenerUsuario(id)).withSelfRel(),
+                linkTo(methodOn(UsuarioController.class).listarUsuario()).withRel("all-usuarios"),
+                linkTo(methodOn(UsuarioController.class).listarProductos(id)).withRel("productos"));
+
+        return ResponseEntity.ok(resource);
+    }
+
+    @PostMapping
+    public ResponseEntity<EntityModel<Usuario>> guardarUsuario(@RequestBody Usuario usuario) {
+        Usuario nuevoUsuario = usuarioService.save(usuario);
+        EntityModel<Usuario> resource = EntityModel.of(nuevoUsuario,
+                linkTo(methodOn(UsuarioController.class).obtenerUsuario(nuevoUsuario.getId())).withSelfRel(),
+                linkTo(methodOn(UsuarioController.class).listarUsuario()).withRel("all-usuarios"));
+
+        return ResponseEntity.ok(resource);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Usuario> eliminarUsuario(@PathVariable("id")int id){
+    public ResponseEntity<Void> eliminarUsuario(@PathVariable("id") int id) {
         Usuario usuario = usuarioService.getUsuarioById(id);
-        if(usuario == null){
+        if (usuario == null) {
             return ResponseEntity.notFound().build();
         }
         usuarioService.borrarUsuario(id);
         return ResponseEntity.noContent().build();
     }
 
-    @PostMapping
-    public ResponseEntity<Usuario> guardarUsuario(@RequestBody Usuario usuario){
-        Usuario nuevoUsuario = usuarioService.save(usuario);
-        return ResponseEntity.ok(nuevoUsuario);
+    @GetMapping("/productos/{usuarioId}")
+    public ResponseEntity<List<Producto>> listarProductos(@PathVariable("usuarioId") int id) {
+        Usuario usuario = usuarioService.getUsuarioById(id);
+        if (usuario == null) {
+            return ResponseEntity.notFound().build();
+        }
+        List<Producto> productos = usuarioService.getProductos(id);
+        return ResponseEntity.ok(productos);
     }
-
-
 }
-
-

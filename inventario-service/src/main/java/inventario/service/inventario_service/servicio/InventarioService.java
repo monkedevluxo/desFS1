@@ -1,14 +1,12 @@
 package inventario.service.inventario_service.servicio;
 
-import java.util.List;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
-
-import inventario.service.inventario_service.dto.ProductoDTO;
 import inventario.service.inventario_service.entidades.Inventario;
 import inventario.service.inventario_service.repositorio.InventarioRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Optional;
 
 @Service
 public class InventarioService {
@@ -16,28 +14,32 @@ public class InventarioService {
     @Autowired
     private InventarioRepository inventarioRepository;
 
-    @Autowired
-    private RestTemplate restTemplate;
-
-    public List<Inventario> getAll(){
+    public List<Inventario> getAll() {
         return inventarioRepository.findAll();
     }
 
-    public List<Inventario> obtenerPorSucursal(Long sucursalId) {
+    public Inventario getById(Long id) {
+        Optional<Inventario> optional = inventarioRepository.findById(id);
+        return optional.orElse(null);
+    }
+
+    public List<Inventario> getBySucursalId(Long sucursalId) {
         return inventarioRepository.findBySucursalId(sucursalId);
     }
 
-    public Inventario actualizarStock(Long productoId, Long sucursalId, int nuevaCantidad) {
-        Inventario inv = inventarioRepository.findByProductoAndSucursalId(productoId, sucursalId);
-        if (inv != null) {
-            inv.setCantidad(nuevaCantidad);
-            return inventarioRepository.save(inv);
-        }
-        return null;
+    public List<Inventario> getByProductoId(Long productoId) {
+        return inventarioRepository.findByProductoId(productoId);
     }
 
-    public ProductoDTO obtenerProductoPorId(Long productoId){
-        String url = "http://localhost:8002/api/productos/" + productoId;
-        return restTemplate.getForObject(url, ProductoDTO.class);
+    public Inventario getByProductoAndSucursal(Long productoId, Long sucursalId) {
+        return inventarioRepository.findByProductoIdAndSucursalId(productoId, sucursalId);
+    }
+
+    public Inventario save(Inventario inventario) {
+        return inventarioRepository.save(inventario);
+    }
+
+    public void deleteById(Long id) {
+        inventarioRepository.deleteById(id);
     }
 }

@@ -1,0 +1,7 @@
+inventario\service\inventario_service\servicio\InventarioService.class
+inventario\service\inventario_service\InventarioServiceApplication.class
+inventario\service\inventario_service\repositorio\InventarioRepository.class
+inventario\service\inventario_service\config\AppConfig.class
+inventario\service\inventario_service\entidades\Inventario.class
+inventario\service\inventario_service\dto\ProductoDTO.class
+inventario\service\inventario_service\controlador\InventarioController.class

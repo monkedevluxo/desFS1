@@ -2,10 +2,12 @@ package com.envio.service.envio_service.entidades;
 
 import java.time.LocalDateTime;
 
+import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 
+@Entity
 public class Envio {
     
     @Id
